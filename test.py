@@ -4,6 +4,7 @@
 
 import socket
 import os
+import sys
 from kitty.model import Template
 from kitty.model import GraphModel
 from kitty.fuzzers import ServerFuzzer
@@ -11,17 +12,8 @@ from kitty.targets.server import ServerTarget
 from kitty.interfaces import WebInterface
 from kitty.controllers.base import BaseController
 
-from kitty.model import *
+import models
 
-
-http_get_v1 = Template(name='HTTP_GET_V1', fields=[
-    String('GET', name='method'),           # 1. Method - a string with the value "GET"
-    Delimiter(' ', name='space1'),          # 1.a The space between Method and Path
-    String('/index.html', name='path'),     # 2. Path - a string with the value "/index.html"
-    Delimiter(' ', name='space2'),          # 2.a. The space between Path and Protocol
-    String('HTTP/1.0', name='protocol'),    # 3. Protocol - a string with the value "HTTP/1.1"
-    Delimiter('\r\n\r\n', name='eom'),      # 4. The double "new lines" ("\r\n\r\n") at the end of the http request
-])
 
 #=====================================================================
 class TcpTarget(ServerTarget):
@@ -103,63 +95,88 @@ class LocalProcessController(BaseController):
 		self.report.add('process_args', self._process_args)
 		self.report.add('process_id', self._process.pid)
 
-def post_test(self):
-	'''Called when test is done'''
-	self._stop_process()
-	## Make sure process started by us
-	assert(self._process)
-	## add process information to the report
-	self.report.add('stdout', self._process.stdout.read())
-	self.report.add('stderr', self._process.stderr.read())
-	self.logger.debug('return code: %d', self._process.returncode)
-	self.report.add('return_code', self._process.returncode)
-	## if the process crashed, we will have a different return code
-	self.report.add('failed', self._process.returncode != 0)
-	self._process = None
-	## call the super
-	super(ClientProcessController, self).post_test()
+	def post_test(self):
+		'''Called when test is done'''
+		self._stop_process()
+		## Make sure process started by us
+		assert(self._process)
+		## add process information to the report
+		self.report.add('stdout', self._process.stdout.read())
+		self.report.add('stderr', self._process.stderr.read())
+		self.logger.debug('return code: %d', self._process.returncode)
+		self.report.add('return_code', self._process.returncode)
+		## if the process crashed, we will have a different return code
+		self.report.add('failed', self._process.returncode != 0)
+		self._process = None
+		## call the super
+		super(ClientProcessController, self).post_test()
+
+	def teardown(self):
+		'''
+		Called at the end of the fuzzing session, override with victim teardown
+		'''
+		self._stop_process()
+		self._process = None
+		super(ClientProcessController, self).teardown()
+
+	def _stop_process(self):
+		if self._is_victim_alive():
+			self._process.terminate()
+			time.sleep(0.5)
+			if self._is_victim_alive():
+				self._process.kill()
+				time.sleep(0.5)
+				if self._is_victim_alive():
+					raise Exception('Failed to kill client process')
+
+	def _is_victim_alive(self):
+		return self._process and (self._process.poll() is None)
+
+
 #=====================================================================
 if __name__=="__main__":
-	test_name = 'GET fuzzed'
+	test_name = 'Server fuzzer 0.1'
+	test_session='test'					# 'test' or 'fuzz'
 
+	
 	NAME="target"
-	HOST="www.baidu.com"
+	HOST="localhost"
 	PORT=80
 
+	#---------------------------------------------
+	# initialize fuzzer
 	target=TcpTarget(NAME,HOST,PORT)
 	target.pre_test(1)
 	
+	if test_session is 'test':
+		# Simple test to verify connections
+		buf=models.http_get_v1.render().tobytes()
+		target.transmit(buf)
+		print target._receive_from_target()
+		sys.exit(0)
 
-	# Simple test to verify connections
-	#buf=http_get_v1.render().tobytes()
-	#target.transmit(buf)
-	#print target._receive_from_target()
 
-
-	fuzzer=ServerFuzzer("Server fuzzer 0.1")
+	fuzzer=ServerFuzzer(test_name)
 	fuzzer.set_interface(WebInterface(HOST, PORT))
 
 	# Set controller
-	env = os.environ.copy()
-	env['DISPLAY'] = ':2'
-	controller = ClientProcessController(
-		'BrowserController',
-		'/usr/bin/opera',
-		['http://localhost:8082/fuzzed'],
-		process_env=env
-	)
-	target.set_controller(controller)
-	target.set_mutation_server_timeout(20)
+	#controller = LocalProcessController()
+	#target.set_controller(controller)
+	#target.set_mutation_server_timeout(20)
+
 
 	model = GraphModel('model_01')
-	model.connect(http_get_v1)
+	model.connect(models.http_get_v1)
+
+
+
+	#--------------------------------------------
+	# Ready to fuzz
 	fuzzer.set_model(model)
 	fuzzer.set_target(target)
 
-
-	target.transmit(http_get_v1)
-
-
+	fuzzer.start()
+	
 
 
 
