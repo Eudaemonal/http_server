@@ -11,6 +11,9 @@ from kitty.fuzzers import ServerFuzzer
 from kitty.targets.server import ServerTarget
 from kitty.interfaces import WebInterface
 from kitty.controllers.base import BaseController
+from kitty.controllers import EmptyController
+from kitty.targets import ServerTarget
+from kitty.remote import RpcServer
 
 import models
 
@@ -60,6 +63,9 @@ class TcpTarget(ServerTarget):
 
 
 	def _send_to_target(self, data):
+		print "data:"+ data
+		print self.host
+		print self.port
 		self.socket.send(data)
 
 	def _receive_from_target(self):
@@ -136,17 +142,26 @@ class LocalProcessController(BaseController):
 #=====================================================================
 if __name__=="__main__":
 	test_name = 'Server fuzzer 0.1'
-	test_session='test'					# 'test' or 'fuzz'
+	test_session='fuzz'					# 'test' or 'fuzz'
 
-	
+	'''	
+	apache2:	192.168.146.131		80
+	caddy: 		192.168.146.131		2015
+	jexus: 		192.168.146.131		2016
+	monkey:		192.168.146.131		2017
+	lighttpd:	192.168.146.131		2018
+
+	'''
 	NAME="target"
-	HOST="localhost"
-	PORT=80
+	HOST="192.168.146.131"
+	PORT=2015
 
 	#---------------------------------------------
 	# initialize fuzzer
 	target=TcpTarget(NAME,HOST,PORT)
 	target.pre_test(1)
+	
+
 	
 	if test_session is 'test':
 		# Simple test to verify connections
@@ -159,24 +174,27 @@ if __name__=="__main__":
 	fuzzer=ServerFuzzer(test_name)
 	fuzzer.set_interface(WebInterface(HOST, PORT))
 
-	# Set controller
+	# Set controller 
 	#controller = LocalProcessController()
 	#target.set_controller(controller)
 	#target.set_mutation_server_timeout(20)
 
+	controller = EmptyController('EmptyController')
+	target.set_controller(controller)
+	#---------------------------------------------
 
 	model = GraphModel('model_01')
-	model.connect(models.http_get_v1)
-
-
+	model.connect(models.http_post_01)
+	model.connect(models.http_post_01, models.http_req_01)
+	model.connect(models.http_req_01, models.http_xss_01)
 
 	#--------------------------------------------
 	# Ready to fuzz
 	fuzzer.set_model(model)
 	fuzzer.set_target(target)
 
+
 	fuzzer.start()
-	
 
 
 
