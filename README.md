@@ -1,6 +1,14 @@
 # http_server
 
 
+Useage: 
+
+Change the HOST and PORT in test.py 156, 157, and start fuzzing
+
+
+
+
+
 #--------------------------------------------------------------
 # caddy: 		192.168.146.131		2015
 
