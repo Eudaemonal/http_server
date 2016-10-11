@@ -10,10 +10,12 @@ from kitty.model import GraphModel
 from kitty.fuzzers import ServerFuzzer
 from kitty.targets.server import ServerTarget
 from kitty.interfaces import WebInterface
-from kitty.controllers.base import BaseController
-from kitty.controllers import EmptyController
 from kitty.targets import ServerTarget
 from kitty.remote import RpcServer
+from katnip.controllers.client.process import ClientProcessController
+from kitty.controllers.empty import EmptyController
+from kitty.controllers.base import BaseController
+from kitty.controllers.client import ClientController
 
 from kitty.model import *
 #==================================================================
@@ -163,14 +165,14 @@ class TcpTarget(ServerTarget):
 		return self.socket.recv(10000)
 #=====================================================================
 class LocalProcessController(BaseController):
-	def __init__(self, name, process_path, process_args, logger=None):
+	def __init__(self, name, process_path, process_args, process_env=None,logger=None):
 		'''
 		:param name: name of the object
 		:param process_path: path to the target executable
 		:param process_args: arguments to pass to the process
 		:param logger: logger for this object (default: None)
 		'''
-		super(ClientProcessController, self).__init__(name, logger)
+		super(ClientProcessController, self).__init__(name, process_path, process_args,process_env, logger)
 		assert(process_path)
 		assert(os.path.exists(process_path))
 		self._process_path = process_path
@@ -245,7 +247,7 @@ if __name__=="__main__":
 	'''
 	NAME="target"
 	HOST="192.168.146.131"
-	PORT=2015
+	PORT=80
 
 	#---------------------------------------------
 	# initialize fuzzer
@@ -266,7 +268,13 @@ if __name__=="__main__":
 	fuzzer.set_interface(WebInterface(HOST, PORT))
 
 	# Set controller 
-	#controller = LocalProcessController()
+	#env = os.environ.copy()
+	#env['DISPLAY'] = ':2'
+	#controller = LocalProcessController(
+	#	'LocalController',
+	#	'/usr/bin/opera',
+	#	'http://192.168.146.131:80'
+	#	)
 	#target.set_controller(controller)
 	#target.set_mutation_server_timeout(20)
 
