@@ -247,7 +247,7 @@ if __name__=="__main__":
 	'''
 	NAME="target"
 	HOST="192.168.146.131"
-	PORT=80
+	PORT=2015
 
 	#---------------------------------------------
 	# initialize fuzzer
