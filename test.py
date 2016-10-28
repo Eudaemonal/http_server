@@ -10,7 +10,6 @@ from kitty.targets.server import ServerTarget
 from kitty.interfaces import WebInterface
 from kitty.targets import ServerTarget
 from kitty.remote import RpcServer
-from katnip.controllers.client.process import ClientProcessController
 from kitty.controllers.empty import EmptyController
 from kitty.controllers.base import BaseController
 from kitty.controllers.client import ClientController
@@ -28,7 +27,7 @@ lighttpd:	192.168.146.131		2018
 '''
 
 NAME="target"
-HOST="192.168.146.131"
+HOST="localhost"
 PORT=2015
 
 URL="http://"+HOST
@@ -63,9 +62,10 @@ http_get_03 = Template(name='HTTP_GET_03', fields=[
     Delimiter(' ', name='space1'),          # 1.a The space between Method and Path
     String('/index.html', name='path1'),     # 2. Path - a string with the value "/index.html"
 	String('?', name='path2'),     # 2. Path - a string with the value "/index.html"
+    String('doc', name='path3'),     # 2. Path - a string with the value "/index.html"
     Delimiter(' ', name='space2'),          # 2.a. The space between Path and Protocol
     String('HTTP/1.0', name='protocol'),    # 3. Protocol - a string with the value "HTTP/1.1"
-    Delimiter('\r\n\r\n', name='eom'),      # 4. The double "new lines" ("\r\n\r\n") at the end of the http request
+    Delimiter('\r\n\r\n', name='eom'),      
 ])
 
 #----------------------------------------------------------------
@@ -82,13 +82,13 @@ http_post_01 = Template(name='HTTP_POST_01', fields=[
 #==================================================================
 # Request- URI
 
-http_req_01 = Template(name='HTTP_GET_01', fields=[
+http_req_01 = Template(name='HTTP_REQ_01', fields=[
     String('GET', name='method'),           # 1. Method - a string with the value "GET"
     Delimiter(' ', name='space1'),          # 1.a The space between Method and Path
     String('/index.html', name='path'),     # 2. Path - a string with the value "/index.html"
     Delimiter(' ', name='space2'),          # 2.a. The space between Path and Protocol
     String('HTTP/1.0', name='protocol'),    # 3. Protocol - a string with the value "HTTP/1.1"
-    Delimiter('\r\n\r\n', name='eom'),      # 4. The double "new lines" ("\r\n\r\n") at the end of the http request
+    Delimiter('\r\n\r\n', name='eom'),      
 	String('Host', name='host'), 
 	Delimiter(':', name='colon1'),
 	Delimiter(' ', name='space3'),
@@ -389,15 +389,10 @@ if __name__=="__main__":
 	test_name = 'Server fuzzer 0.1'
 	test_session='fuzz'					# 'test' or 'fuzz'
 
-
-
-
 	#---------------------------------------------
 	# initialize fuzzer
 	target=TcpTarget(NAME,HOST,PORT)
 	target.pre_test(1)
-	
-
 	
 	if test_session is 'test':
 		# Simple test to verify connections
@@ -419,35 +414,20 @@ if __name__=="__main__":
 	#	'http://192.168.146.131:80'
 	#	)
 	#target.set_controller(controller)
-	#target.set_mutation_server_timeout(20)
+	
 
 	controller = EmptyController('EmptyController')
 	target.set_controller(controller)
+	
 	#---------------------------------------------
 
 	model = GraphModel('model_01')
 
-	model.connect(http_post_01)
-	model.connect(http_post_01, http_get_01)
-	model.connect(http_get_01, http_xss_01)
+	model.connect(http_get_01)
+	model.connect(http_get_01, http_req_01)
+	model.connect(http_req_01, http_xss_01)
 
-	model.connect(http_post_01, http_get_02)
-	model.connect(http_get_02, http_xss_01)
 
-	model.connect(http_post_01, http_get_03)
-	model.connect(http_get_03, http_xss_01)
- 
-	model.connect(http_xss_01, http_req_01)
-	model.connect(http_xss_01, http_req_02)
-
-	model.connect(http_req_01, http_xss_02)
-	model.connect(http_req_02, http_xss_02)	
-
-	model.connect(put_head, delete_head)
-	model.connect(delete_head, option_head)
-	model.connect(option_head, trace_head)
-
-	
 
 	#--------------------------------------------
 	# Ready to fuzz
