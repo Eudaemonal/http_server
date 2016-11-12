@@ -62,7 +62,35 @@ Change the HOST and PORT in test.py 156, 157, and start fuzzing
 
 
 
+# Instructions for starting server
+#====================================
+# Server	Start					Port
+Apache2		default					80
 
+caddy		cd caddy				2015
+			./caddy
+
+jexus		cd /usr/jexus				2016
+			sudo ./jws start
+
+
+monkey		cd /home/user/monkey-1.6.9		2017	
+			build/monkey
+
+lighttpd	sudo /etc/init.d/lighttpd start		2018
+
+
+#====================================
+# test server:
+
+localhost:2015
+
+
+
+sudo lsof -i -n -P
+
+
+sudo sh -c "ulimit -n 8192 && exec su user"
 
 
 
