@@ -48,6 +48,8 @@ http_get_01 = Template(name='HTTP_GET_01', fields=[
 
 
 
+
+
 http_get_02 = Template(name='HTTP_GET_02', fields=[
     String('GET', name='method', fuzzable=False),           # 1. Method - a string with the value "GET"
     Delimiter(' ', name='space1', fuzzable=False),          # 1.a The space between Method and Path
