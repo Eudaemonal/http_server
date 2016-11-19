@@ -204,15 +204,15 @@ http_xss_04 = Template(name='HTTP_XSS_04', fields=[
 ])
 
 http_xss_05 = Template(name='HTTP_XSS_05', fields=[
-    String('GET', name='method', fuzzable=False),           # 1. Method - a string with the value "GET"
-    Delimiter(' ', name='space1', fuzzable=False),          # 1.a The space between Method and Path
-    String('/index.html', name='path'),     # 2. Path - a string with the value "/index.html" 
+    String('GET', name='method', fuzzable=False),
+    Delimiter(' ', name='space1', fuzzable=False),
+    String('/index.html', name='path'),     
 	String('?<script>alert(1)</script>', name='xss1'),
 	String('<script>\n', name='xss2'),
 	String("registerStatistics('searchTerm', '');\n", name='xss3'),
 	String('</script>\n', name='xss4'),
-    Delimiter(' ', name='space2'),          # 2.a. The space between Path and Protocol
-    String('HTTP/1.0', name='protocol', fuzzable=False),    # 3. Protocol - a string with the value "HTTP/1.1"
+    Delimiter(' ', name='space2'),          
+    String('HTTP/1.0', name='protocol', fuzzable=False),    
     Delimiter('\r\n\r\n', name='eom', fuzzable=False),   
 	String('Host: ', name='host', fuzzable=False),
 	String(URL, name='url', fuzzable=False),
@@ -248,7 +248,7 @@ http_xss_06 = Template(name='HTTP_XSS_06', fields=[
 
 
 http_xss_07 = Template(name='HTTP_XSS_07', fields=[
-    String('GET', name='method', fuzzable=False),           # 1. Method - a string with the value "GET"
+    String('GET', name='method', fuzzable=False),
     Delimiter(' ', name='space1', fuzzable=False),          # 1.a The space between Method and Path
     String('/index.html', name='path'),     # 2. Path - a string with the value "/index.html" 
 	String('?', name='xss0_0', fuzzable=False),
@@ -785,7 +785,7 @@ class LocalProcessController(BaseController):
 
 #=====================================================================
 if __name__=="__main__":
-	test_name = 'Server fuzzer 0.2'
+	test_name = 'Server fuzzer 1.0'
 	test_session='fuzz'					# 'test' or 'fuzz'
 
 	#---------------------------------------------
