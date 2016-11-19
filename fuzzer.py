@@ -28,7 +28,7 @@ lighttpd:	192.168.146.131		2018
 
 NAME="target"
 HOST="localhost"
-PORT=2018
+PORT=80
 
 URL="http://"+HOST
 
@@ -565,6 +565,57 @@ http_xpath_01 = Template(name='HTTP_Xpath_01', fields=[
 ])
 
 
+
+
+http_xpath_02 = Template(name='HTTP_Xpath_01', fields=[
+    String('GET', name='method', fuzzable=False),           # 1. Method - a string with the value "GET"
+    Delimiter(' ', name='space1', fuzzable=False),          # 1.a The space between Method and Path
+    String('/index.html', name='path', fuzzable=False),     # 2. Path - a string with the value "/index.html"
+	String('?', name='xpath0', fuzzable=False),
+	String('\'+or+\'\'=\'', name='xpath1'),
+    Delimiter(' ', name='space2', fuzzable=False),          # 2.a. The space between Path and Protocol
+    String('HTTP/1.1', name='protocol', fuzzable=False),    # 3. Protocol - a string with the value "HTTP/1.1"
+    Delimiter('\r\n\r\n', name='eom', fuzzable=False),      # 4. The double "new lines" ("\r\n\r\n") at the end of the http request
+])
+
+
+
+http_xpath_03 = Template(name='HTTP_Xpath_01', fields=[
+    String('GET', name='method', fuzzable=False),           # 1. Method - a string with the value "GET"
+    Delimiter(' ', name='space1', fuzzable=False),          # 1.a The space between Method and Path
+    String('/index.html', name='path', fuzzable=False),     # 2. Path - a string with the value "/index.html"
+	String('?', name='xpath0', fuzzable=False),
+	String('x\'+or+1=1+or+\'x\'=\'y', name='xpath1'),
+    Delimiter(' ', name='space2', fuzzable=False),          # 2.a. The space between Path and Protocol
+    String('HTTP/1.1', name='protocol', fuzzable=False),    # 3. Protocol - a string with the value "HTTP/1.1"
+    Delimiter('\r\n\r\n', name='eom', fuzzable=False),      # 4. The double "new lines" ("\r\n\r\n") at the end of the http request
+])
+
+
+http_xpath_04 = Template(name='HTTP_Xpath_01', fields=[
+    String('GET', name='method', fuzzable=False),           # 1. Method - a string with the value "GET"
+    Delimiter(' ', name='space1', fuzzable=False),          # 1.a The space between Method and Path
+    String('/index.html', name='path', fuzzable=False),     # 2. Path - a string with the value "/index.html"
+	String('?', name='xpath0', fuzzable=False),
+	String('/', name='xpath1'),
+    Delimiter(' ', name='space2', fuzzable=False),          # 2.a. The space between Path and Protocol
+    String('HTTP/1.1', name='protocol', fuzzable=False),    # 3. Protocol - a string with the value "HTTP/1.1"
+    Delimiter('\r\n\r\n', name='eom', fuzzable=False),      # 4. The double "new lines" ("\r\n\r\n") at the end of the http request
+])
+
+
+http_xpath_05 = Template(name='HTTP_Xpath_01', fields=[
+    String('GET', name='method', fuzzable=False),           # 1. Method - a string with the value "GET"
+    Delimiter(' ', name='space1', fuzzable=False),          # 1.a The space between Method and Path
+    String('/index.html', name='path', fuzzable=False),     # 2. Path - a string with the value "/index.html"
+	String('?', name='xpath0', fuzzable=False),
+	String('//', name='xpath1'),
+    Delimiter(' ', name='space2', fuzzable=False),          # 2.a. The space between Path and Protocol
+    String('HTTP/1.1', name='protocol', fuzzable=False),    # 3. Protocol - a string with the value "HTTP/1.1"
+    Delimiter('\r\n\r\n', name='eom', fuzzable=False),      # 4. The double "new lines" ("\r\n\r\n") at the end of the http request
+])
+
+
 #========================================================================
 # Code Injection
 http_code_01 = Template(name='http_code_01', fields=[
@@ -826,15 +877,25 @@ if __name__=="__main__":
 	model.connect(http_get_02, http_get_03)
 	model.connect(http_get_01, http_path_01)	#path
 	model.connect(http_path_01, http_path_02)
+
 	model.connect(http_path_02, http_xss_01)	#xss
-	model.connect(http_xss_01, http_xss_02)
-	model.connect(http_xss_02, http_xss_03)
-	model.connect(http_xss_03, http_xss_04)
-	model.connect(http_xss_04, http_xss_05)
-	model.connect(http_xss_05, http_xss_06)
-	model.connect(http_xss_06, http_xss_07)
-	model.connect(http_xss_07, http_xss_08)
+	model.connect(http_path_02, http_xss_02)	#xss
+	model.connect(http_path_02, http_xss_03)	#xss
+	model.connect(http_path_02, http_xss_04)	#xss
+	model.connect(http_path_02, http_xss_05)	#xss
+	model.connect(http_path_02, http_xss_06)	#xss
+	model.connect(http_path_02, http_xss_07)	#xss
+	model.connect(http_path_02, http_xss_08)	#xss
+
+	model.connect(http_xss_01, http_xml_01)		#xml
+	model.connect(http_xss_02, http_xml_01)		#xml
+	model.connect(http_xss_03, http_xml_01)		#xml
+	model.connect(http_xss_04, http_xml_01)		#xml
+	model.connect(http_xss_05, http_xml_01)		#xml
+	model.connect(http_xss_06, http_xml_01)		#xml
+	model.connect(http_xss_07, http_xml_01)		#xml
 	model.connect(http_xss_08, http_xml_01)		#xml
+
 	model.connect(http_xml_01, http_xml_02)
 	model.connect(http_xml_02, http_xml_03)
 	model.connect(http_xml_03, http_xml_04)
@@ -844,14 +905,25 @@ if __name__=="__main__":
 	model.connect(http_ovf_02, http_fmt_01)		#format string
 	model.connect(http_fmt_01, http_fmt_02)
 	model.connect(http_fmt_02, http_fmt_03)
+
 	model.connect(http_fmt_03, http_sql_01)		#sql
-	model.connect(http_sql_01, http_sql_02)	
-	model.connect(http_sql_02, http_sql_03)	
-	model.connect(http_sql_03, http_sql_04)	
-	model.connect(http_sql_04, http_sql_05)	
-	model.connect(http_sql_05, http_sql_06)	
-#	model.connect(http_sql_06, http_sql_07)	
-#	model.connect(http_sql_07, http_xpath_01)	#xpath
+	model.connect(http_fmt_03, http_sql_02)		#sql
+	model.connect(http_fmt_03, http_sql_03)		#sql
+	model.connect(http_fmt_03, http_sql_04)		#sql
+	model.connect(http_fmt_03, http_sql_05)		#sql
+	model.connect(http_fmt_03, http_sql_06)		#sql
+	model.connect(http_fmt_03, http_sql_07)		#sql
+
+	model.connect(http_sql_01, http_xpath_01)	#xpath
+	model.connect(http_sql_02, http_xpath_01)	#xpath
+	model.connect(http_sql_03, http_xpath_01)	#xpath
+	model.connect(http_sql_04, http_xpath_01)	#xpath
+	model.connect(http_sql_05, http_xpath_01)	#xpath
+	model.connect(http_sql_06, http_xpath_01)	#xpath
+	model.connect(http_sql_07, http_xpath_01)	#xpath
+
+put_head
+
 
 
 	#--------------------------------------------
