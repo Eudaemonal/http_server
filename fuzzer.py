@@ -567,7 +567,7 @@ http_xpath_01 = Template(name='HTTP_Xpath_01', fields=[
 
 
 
-http_xpath_02 = Template(name='HTTP_Xpath_01', fields=[
+http_xpath_02 = Template(name='HTTP_Xpath_02', fields=[
     String('GET', name='method', fuzzable=False),           # 1. Method - a string with the value "GET"
     Delimiter(' ', name='space1', fuzzable=False),          # 1.a The space between Method and Path
     String('/index.html', name='path', fuzzable=False),     # 2. Path - a string with the value "/index.html"
@@ -580,7 +580,7 @@ http_xpath_02 = Template(name='HTTP_Xpath_01', fields=[
 
 
 
-http_xpath_03 = Template(name='HTTP_Xpath_01', fields=[
+http_xpath_03 = Template(name='HTTP_Xpath_03', fields=[
     String('GET', name='method', fuzzable=False),           # 1. Method - a string with the value "GET"
     Delimiter(' ', name='space1', fuzzable=False),          # 1.a The space between Method and Path
     String('/index.html', name='path', fuzzable=False),     # 2. Path - a string with the value "/index.html"
@@ -592,7 +592,7 @@ http_xpath_03 = Template(name='HTTP_Xpath_01', fields=[
 ])
 
 
-http_xpath_04 = Template(name='HTTP_Xpath_01', fields=[
+http_xpath_04 = Template(name='HTTP_Xpath_04', fields=[
     String('GET', name='method', fuzzable=False),           # 1. Method - a string with the value "GET"
     Delimiter(' ', name='space1', fuzzable=False),          # 1.a The space between Method and Path
     String('/index.html', name='path', fuzzable=False),     # 2. Path - a string with the value "/index.html"
@@ -604,7 +604,7 @@ http_xpath_04 = Template(name='HTTP_Xpath_01', fields=[
 ])
 
 
-http_xpath_05 = Template(name='HTTP_Xpath_01', fields=[
+http_xpath_05 = Template(name='HTTP_Xpath_05', fields=[
     String('GET', name='method', fuzzable=False),           # 1. Method - a string with the value "GET"
     Delimiter(' ', name='space1', fuzzable=False),          # 1.a The space between Method and Path
     String('/index.html', name='path', fuzzable=False),     # 2. Path - a string with the value "/index.html"
@@ -875,7 +875,7 @@ if __name__=="__main__":
 	model.connect(http_get_01)
 	model.connect(http_get_01, http_get_02)
 	model.connect(http_get_02, http_get_03)
-	model.connect(http_get_01, http_path_01)	#path
+	model.connect(http_get_03, http_path_01)	#path
 	model.connect(http_path_01, http_path_02)
 
 	model.connect(http_path_02, http_xss_01)	#xss
@@ -887,44 +887,72 @@ if __name__=="__main__":
 	model.connect(http_path_02, http_xss_07)	#xss
 	model.connect(http_path_02, http_xss_08)	#xss
 
-	model.connect(http_xss_01, http_xml_01)		#xml
-	model.connect(http_xss_02, http_xml_01)		#xml
-	model.connect(http_xss_03, http_xml_01)		#xml
-	model.connect(http_xss_04, http_xml_01)		#xml
-	model.connect(http_xss_05, http_xml_01)		#xml
-	model.connect(http_xss_06, http_xml_01)		#xml
-	model.connect(http_xss_07, http_xml_01)		#xml
-	model.connect(http_xss_08, http_xml_01)		#xml
+	model.connect(http_xss_01, put_head)		#xml
+	model.connect(http_xss_02, put_head)		#xml
+	model.connect(http_xss_03, put_head)		#xml
+	model.connect(http_xss_04, put_head)		#xml
+	model.connect(http_xss_05, put_head)		#xml
+	model.connect(http_xss_06, put_head)		#xml
+	model.connect(http_xss_07, put_head)		#xml
+	model.connect(http_xss_08, put_head)		#xml
 
-	model.connect(http_xml_01, http_xml_02)
-	model.connect(http_xml_02, http_xml_03)
-	model.connect(http_xml_03, http_xml_04)
-	model.connect(http_xml_04, http_xml_05)
-	model.connect(http_xml_05, http_ovf_01)		#overflow 
-	model.connect(http_ovf_01, http_ovf_02)
-	model.connect(http_ovf_02, http_fmt_01)		#format string
-	model.connect(http_fmt_01, http_fmt_02)
-	model.connect(http_fmt_02, http_fmt_03)
-
-	model.connect(http_fmt_03, http_sql_01)		#sql
-	model.connect(http_fmt_03, http_sql_02)		#sql
-	model.connect(http_fmt_03, http_sql_03)		#sql
-	model.connect(http_fmt_03, http_sql_04)		#sql
-	model.connect(http_fmt_03, http_sql_05)		#sql
-	model.connect(http_fmt_03, http_sql_06)		#sql
-	model.connect(http_fmt_03, http_sql_07)		#sql
-
-	model.connect(http_sql_01, http_xpath_01)	#xpath
-	model.connect(http_sql_02, http_xpath_01)	#xpath
-	model.connect(http_sql_03, http_xpath_01)	#xpath
-	model.connect(http_sql_04, http_xpath_01)	#xpath
-	model.connect(http_sql_05, http_xpath_01)	#xpath
-	model.connect(http_sql_06, http_xpath_01)	#xpath
-	model.connect(http_sql_07, http_xpath_01)	#xpath
-
-put_head
+	model.connect(put_head, http_xml_01)
+	model.connect(put_head, http_xml_02)
+	model.connect(put_head, http_xml_03)
+	model.connect(put_head, http_xml_04)
+	model.connect(put_head, http_xml_05)
 
 
+	model.connect(http_xml_01, del_head)
+	model.connect(http_xml_02, del_head)
+	model.connect(http_xml_03, del_head)
+	model.connect(http_xml_04, del_head)
+	model.connect(http_xml_05, del_head)		
+
+
+	model.connect(del_head, http_ovf_01)		#overflow 
+	model.connect(del_head, http_ovf_02)
+
+	model.connect(http_ovf_01, opt_head)	
+	model.connect(http_ovf_02, opt_head)
+
+	model.connect(opt_head, http_fmt_01)		#format string
+	model.connect(opt_head, http_fmt_02)
+	model.connect(opt_head, http_fmt_03)
+
+	model.connect(http_fmt_01, trace_head)
+	model.connect(http_fmt_02, trace_head)
+	model.connect(http_fmt_03, trace_head)
+
+
+	model.connect(trace_head, http_sql_01)		#sql
+	model.connect(trace_head, http_sql_02)		#sql
+	model.connect(trace_head, http_sql_03)		#sql
+	model.connect(trace_head, http_sql_04)		#sql
+	model.connect(trace_head, http_sql_05)		#sql
+	model.connect(trace_head, http_sql_06)		#sql
+	model.connect(trace_head, http_sql_07)		#sql
+
+	model.connect(http_sql_01, apache_killer)	#xpath
+	model.connect(http_sql_02, apache_killer)	#xpath
+	model.connect(http_sql_03, apache_killer)	#xpath
+	model.connect(http_sql_04, apache_killer)	#xpath
+	model.connect(http_sql_05, apache_killer)	#xpath
+	model.connect(http_sql_06, apache_killer)	#xpath
+	model.connect(http_sql_07, apache_killer)	#xpath
+
+	model.connect(apache_killer, http_xpath_01)
+	model.connect(apache_killer, http_xpath_02)
+	model.connect(apache_killer, http_xpath_03)
+	model.connect(apache_killer, http_xpath_04)
+	model.connect(apache_killer, http_xpath_05)
+
+
+	model.connect(http_xpath_01, http_code_01)
+	model.connect(http_xpath_02, http_code_01)
+	model.connect(http_xpath_03, http_code_01)
+	model.connect(http_xpath_04, http_code_01)
+	model.connect(http_xpath_05, http_code_01)
 
 	#--------------------------------------------
 	# Ready to fuzz
